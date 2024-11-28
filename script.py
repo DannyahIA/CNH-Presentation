@@ -1,3 +1,4 @@
+from sklearn.tree import plot_tree
 import streamlit as st
 import pandas as pd
 import seaborn as sns
@@ -42,101 +43,126 @@ if uploaded_file:
     filtered_df = answers_df[columns_to_use]
     grupo1_df = filtered_df[filtered_df["Grupo de Produto"] == "Grupo 1"]
 
-    st.write("### Dados Filtrados (Grupo 1)")
-    st.dataframe(grupo1_df)
+    # Filtrar neutros e detratores
+    neutros_df = grupo1_df[(grupo1_df["nota"] >= 7) & (grupo1_df["nota"] <= 8)]
+    detratores_df = grupo1_df[grupo1_df["nota"] <= 6]
 
-    # Cálculo da Moda
-    st.write("### Estatísticas: Moda")
-    moda = grupo1_df.mode().iloc[0]  # A moda de cada coluna
-    st.write(moda)
+    def plot_data(df, title_suffix):
+        st.write(f"### Dados Filtrados (Grupo 1 - {title_suffix})")
+        st.dataframe(df)
 
-    # Gráfico de Moda
-    st.write("#### Gráfico de Moda")
-    moda_numeric = moda[2:]  # Ignorar as duas primeiras colunas não numéricas
-    fig, ax = plt.subplots()
-    moda_numeric.plot(kind="bar", color="skyblue", ax=ax)
-    ax.set_title("Moda das Variáveis CSAT")
-    ax.set_ylabel("Valores")
-    ax.set_xticklabels(moda_numeric.index, rotation=45, ha="right")
-    st.pyplot(fig)
+        # Cálculo da Moda
+        st.write(f"### Estatísticas: Moda ({title_suffix})")
+        moda = df.mode().iloc[0]  # A moda de cada coluna
+        st.write(moda)
 
-    # Cálculo da Covariância
-    st.write("### Estatísticas: Covariância")
-    csat_columns = grupo1_df.columns[2:]  # Apenas colunas numéricas
-    cov_matrix = grupo1_df[csat_columns].cov()
-    st.write(cov_matrix)
+        # Gráfico de Moda
+        st.write(f"#### Gráfico de Moda ({title_suffix})")
+        moda_numeric = moda[2:]  # Ignorar as duas primeiras colunas não numéricas
+        fig, ax = plt.subplots()
+        moda_numeric.plot(kind="bar", color="skyblue", ax=ax)
+        ax.set_title(f"Moda das Variáveis CSAT ({title_suffix})")
+        ax.set_ylabel("Valores")
+        ax.set_xticklabels(moda_numeric.index, rotation=45, ha="right")
+        st.pyplot(fig)
 
-    # Visualização da Matriz de Covariância
-    st.write("#### Mapa de Calor da Covariância")
-    fig, ax = plt.subplots()
-    sns.heatmap(cov_matrix, annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
-    st.pyplot(fig)
+        # Cálculo da Covariância
+        st.write(f"### Estatísticas: Covariância ({title_suffix})")
+        csat_columns = df.columns[2:]  # Apenas colunas numéricas
+        cov_matrix = df[csat_columns].cov()
+        st.write(cov_matrix)
 
-    # Métodos Não Supervisionados
-    st.write("### Métodos Não Supervisionados")
-    k = st.slider("Selecione o número de clusters:", min_value=2, max_value=10, value=3)
-    X = grupo1_df[csat_columns].fillna(0)
+        # Visualização da Matriz de Covariância
+        st.write(f"#### Mapa de Calor da Covariância ({title_suffix})")
+        fig, ax = plt.subplots()
+        sns.heatmap(cov_matrix, annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
+        st.pyplot(fig)
 
-    # K-Means
-    kmeans = KMeans(n_clusters=k, random_state=42)
-    grupo1_df["KMeans Cluster"] = kmeans.fit_predict(X)
+        # Métodos Não Supervisionados
+        st.write(f"### Métodos Não Supervisionados ({title_suffix})")
+        k = st.slider("Selecione o número de clusters:", min_value=2, max_value=10, value=3, key=f"slider_{title_suffix}")
+        X = df[csat_columns].fillna(0)
 
-    # Redução de Dimensionalidade para Visualização
-    pca = PCA(n_components=2)
-    reduced_data = pca.fit_transform(X)
-    grupo1_df["PCA1"] = reduced_data[:, 0]
-    grupo1_df["PCA2"] = reduced_data[:, 1]
+        # K-Means
+        kmeans = KMeans(n_clusters=k, random_state=42)
+        df["KMeans Cluster"] = kmeans.fit_predict(X)
 
-    fig, ax = plt.subplots()
-    sns.scatterplot(
-        x="PCA1", y="PCA2", hue="KMeans Cluster", palette="viridis", data=grupo1_df, ax=ax
-    )
-    ax.set_title("Clusters Formados - K-Means (PCA)")
-    st.pyplot(fig)
+        # Redução de Dimensionalidade para Visualização
+        pca = PCA(n_components=2)
+        reduced_data = pca.fit_transform(X)
+        df["PCA1"] = reduced_data[:, 0]
+        df["PCA2"] = reduced_data[:, 1]
 
-    # Gaussian Mixture (Expectation Maximization)
-    gmm = GaussianMixture(n_components=k, random_state=42)
-    grupo1_df["EM Cluster"] = gmm.fit_predict(X)
+        fig, ax = plt.subplots()
+        sns.scatterplot(
+            x="PCA1", y="PCA2", hue="KMeans Cluster", palette="viridis", data=df, ax=ax
+        )
+        ax.set_title(f"Clusters Formados - K-Means (PCA) ({title_suffix})")
+        st.pyplot(fig)
 
-    fig, ax = plt.subplots()
-    sns.scatterplot(
-        x="PCA1", y="PCA2", hue="EM Cluster", palette="coolwarm", data=grupo1_df, ax=ax
-    )
-    ax.set_title("Clusters Formados - Expectation Maximization (PCA)")
-    st.pyplot(fig)
+        # Gaussian Mixture (Expectation Maximization)
+        gmm = GaussianMixture(n_components=k, random_state=42)
+        df["EM Cluster"] = gmm.fit_predict(X)
 
-    # Métodos Supervisionados
-    st.write("### Métodos Supervisionados")
-    target = st.selectbox("Selecione a variável alvo (para classificação):", ["nota"])
-    y = grupo1_df[target]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        fig, ax = plt.subplots()
+        sns.scatterplot(
+            x="PCA1", y="PCA2", hue="EM Cluster", palette="coolwarm", data=df, ax=ax
+        )
+        ax.set_title(f"Clusters Formados - Expectation Maximization (PCA) ({title_suffix})")
+        st.pyplot(fig)
 
-    # Random Forests
-    rf_model = RandomForestClassifier(random_state=42)
-    rf_model.fit(X_train, y_train)
-    rf_predictions = rf_model.predict(X_test)
+        # Métodos Supervisionados
+        st.write(f"### Métodos Supervisionados ({title_suffix})")
+        target = st.selectbox("Selecione a variável alvo (para classificação):", ["nota"], key=f"selectbox_{title_suffix}")
+        y = df[target]
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-    st.write("#### Random Forests - Matriz de Confusão")
-    rf_cm = confusion_matrix(y_test, rf_predictions)
-    fig, ax = plt.subplots()
-    ConfusionMatrixDisplay(rf_cm, display_labels=rf_model.classes_).plot(ax=ax, cmap="Blues")
-    st.pyplot(fig)
+        # Random Forests
+        rf_model = RandomForestClassifier(random_state=42)
+        rf_model.fit(X_train, y_train)
+        rf_predictions = rf_model.predict(X_test)
 
-    # KNN
-    knn_model = KNeighborsClassifier()
-    knn_model.fit(X_train, y_train)
-    knn_predictions = knn_model.predict(X_test)
+        st.write(f"#### Random Forests - Árvore de Decisão ({title_suffix})")
+        fig, ax = plt.subplots(figsize=(20, 10))
+        plot_tree(rf_model.estimators_[0], feature_names=csat_columns, class_names=rf_model.classes_.astype(str), filled=True, ax=ax)
+        st.pyplot(fig)
 
-    st.write("#### KNN - Matriz de Confusão")
-    knn_cm = confusion_matrix(y_test, knn_predictions)
-    fig, ax = plt.subplots()
-    ConfusionMatrixDisplay(knn_cm, display_labels=knn_model.classes_).plot(ax=ax, cmap="Oranges")
-    st.pyplot(fig)
+        # Matriz de Confusão
+        st.write(f"#### Random Forests - Matriz de Confusão ({title_suffix})")
+        rf_cm = confusion_matrix(y_test, rf_predictions)
+        fig, ax = plt.subplots()
+        ConfusionMatrixDisplay(rf_cm, display_labels=rf_model.classes_).plot(ax=ax, cmap="Blues")
+        st.pyplot(fig)
 
-    # Relatório de Classificação
-    st.write("#### Relatórios de Classificação")
-    st.write("**Random Forests**")
-    st.text(classification_report(y_test, rf_predictions))
+        # KNN
+        knn_model = KNeighborsClassifier()
+        knn_model.fit(X_train, y_train)
+        knn_predictions = knn_model.predict(X_test)
 
-    st.write("**KNN**")
-    st.text(classification_report(y_test, knn_predictions))
+        st.write(f"#### KNN - Matriz de Confusão ({title_suffix})")
+        knn_cm = confusion_matrix(y_test, knn_predictions)
+        fig, ax = plt.subplots()
+        ConfusionMatrixDisplay(knn_cm, display_labels=knn_model.classes_).plot(ax=ax, cmap="Oranges")
+        st.pyplot(fig)
+
+        # Relatório de Classificação
+        st.write(f"#### Relatórios de Classificação ({title_suffix})")
+        st.write("**Random Forests**")
+        st.text(classification_report(y_test, rf_predictions))
+
+        st.write("**KNN**")
+        st.text(classification_report(y_test, knn_predictions))
+        # Gráfico de Clusters para Gaussian Mixture
+        st.write(f"#### Gráfico de Clusters - Gaussian Mixture ({title_suffix})")
+        fig, ax = plt.subplots()
+        sns.scatterplot(
+            x="PCA1", y="PCA2", hue="EM Cluster", palette="coolwarm", data=df, ax=ax
+        )
+        ax.set_title(f"Clusters Formados - Gaussian Mixture (PCA) ({title_suffix})")
+        st.pyplot(fig)
+
+    # Plot data for neutros
+    plot_data(neutros_df, "Neutros")
+
+    # Plot data for detratores
+    plot_data(detratores_df, "Detratores")
