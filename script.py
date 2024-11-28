@@ -15,29 +15,26 @@ import numpy as np
 # Título da aplicação
 st.title("Dashboard - Análise de Dados")
 
-st.markdown("""
-### Perguntas e Respostas
+with st.expander("Perguntas e Respostas", expanded=False):
+    st.markdown("""
+    **1. Quais perguntas do CSI mais afetam/influenciam o cliente a ser um Neutro?**
 
-**1. Quais perguntas do CSI mais afetam/influenciam o cliente a ser um Neutro?**
+    *R: Com base na análise dos dados, as perguntas relacionadas a fatores como facilidade de operação, conforto e ergonomia, disponibilidade e confiabilidade mecânica e facilidade para a realização de manutenções foram as que mais influenciaram os clientes a se tornarem Neutros. Os neutros tendem a pontuar essas questões de forma moderada, indicando que, embora não estejam completamente satisfeitos, também não se sentem insatisfeitos o suficiente para se classificar como detratores.*
 
-*R: Com base na análise dos dados, as perguntas relacionadas a fatores como facilidade de operação, conforto e ergonomia, disponibilidade e confiabilidade mecânica e facilidade para a realização de manutenções foram as que mais influenciaram os clientes a se tornarem Neutros. Os neutros tendem a pontuar essas questões de forma moderada, indicando que, embora não estejam completamente satisfeitos, também não se sentem insatisfeitos o suficiente para se classificar como detratores.*
+    **2. Quais perguntas do CSI mais afetam/influenciam o cliente a ser um Detrator?**
 
-**2. Quais perguntas do CSI mais afetam/influenciam o cliente a ser um Detrator?**
+    *R: Para os Detratores, as perguntas que mais afetam a pontuação incluem questões como custo de manutenção, consumo de combustível, adequação a diversas operações e implementos, e facilidade de uso do piloto automático. Esses fatores parecem ser determinantes para a insatisfação, com muitos detratores apontando essas áreas como grandes fontes de frustração. Clientes insatisfeitos frequentemente relatam problemas nessas áreas como motivos para dar notas baixas.*
 
-*R: Para os Detratores, as perguntas que mais afetam a pontuação incluem questões como custo de manutenção, consumo de combustível, adequação a diversas operações e implementos, e facilidade de uso do piloto automático. Esses fatores parecem ser determinantes para a insatisfação, com muitos detratores apontando essas áreas como grandes fontes de frustração. Clientes insatisfeitos frequentemente relatam problemas nessas áreas como motivos para dar notas baixas.*
+    **3. Com base em qual argumento/critérios vocês definiram as perguntas que mais afetam o NPS?**
 
-**3. Com base em qual argumento/critérios vocês definiram as perguntas que mais afetam o NPS?**
+    *R: A definição das perguntas mais impactantes para o NPS foi baseada em uma análise quantitativa das médias de nota e da distribuição das pontuações nas diferentes áreas. Além disso, observamos as correlações entre as variáveis de satisfação, como facilidade de operação e manutenção. Aquelas que mostraram uma maior variação nas respostas, ou que apresentaram um impacto direto nas categorias de Neutros e Detratores, foram selecionadas como as mais influentes para o NPS.*
 
-*R: A definição das perguntas mais impactantes para o NPS foi baseada em uma análise quantitativa das médias de nota e da distribuição das pontuações nas diferentes áreas. Além disso, observamos as correlações entre as variáveis de satisfação, como facilidade de operação e manutenção. Aquelas que mostraram uma maior variação nas respostas, ou que apresentaram um impacto direto nas categorias de Neutros e Detratores, foram selecionadas como as mais influentes para o NPS.*
+    **4. Com base em tudo que foi analisado, qual sugestão de melhoria no produto vocês dariam para melhorar o NPS?**
 
-**4. Com base em tudo que foi analisado, qual sugestão de melhoria no produto vocês dariam para melhorar o NPS?**
-
-*R: A partir da análise dos dados, uma sugestão fundamental para melhorar o NPS seria focar em reduzir o custo de manutenção e melhorar o consumo de combustível. Além disso, aprimorar a facilidade de operação e a ergonomia do produto pode aumentar a satisfação, especialmente entre os neutros, que apresentaram uma pontuação moderada nessas áreas. Trabalhar para tornar o produto mais adaptável e reduzir as queixas sobre o piloto automático também pode ajudar a converter detratores em promotores. Um investimento em melhoria contínua nessas áreas poderia gerar um impacto significativo no NPS geral.*
-""")
-
-# Upload do arquivo
-st.write("Por favor, faça upload de um arquivo Excel (Lista NPS) que contenha uma planilha chamada 'answers'.")
-uploaded_file = st.file_uploader("Faça upload do arquivo Excel (Lista NPS):", type=["xlsx"])
+    *R: A partir da análise dos dados, uma sugestão fundamental para melhorar o NPS seria focar em reduzir o custo de manutenção e melhorar o consumo de combustível. Além disso, aprimorar a facilidade de operação e a ergonomia do produto pode aumentar a satisfação, especialmente entre os neutros, que apresentaram uma pontuação moderada nessas áreas. Trabalhar para tornar o produto mais adaptável e reduzir as queixas sobre o piloto automático também pode ajudar a converter detratores em promotores. Um investimento em melhoria contínua nessas áreas poderia gerar um impacto significativo no NPS geral.*
+    """)
+    
+uploaded_file = st.file_uploader("Faça upload do arquivo Excel (Lista NPS que contenha uma planilha chamada 'answers'):", type=["xlsx"])
 
 if uploaded_file:
     # Carregar a folha "answers"
